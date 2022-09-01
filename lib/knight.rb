@@ -15,7 +15,7 @@ class Board
 
     @root = gerar_tree(start, finish)
 
-    knight_trevails(@root, finish)
+    p knight_trevails(@root, finish)
 
     # p @root.adj_list
 
@@ -25,23 +25,27 @@ class Board
   end
 
   def knight_trevails(node, finish, queue = [], result = [])
+    
+
+    
+   
     return if node.nil?
-    binding.pry
 
+    return if result.include? node.position
 
-    p node.position
+    #p node.position
 
     result << node.position
 
     return result if node.position == finish
-
     queue += node.children unless node.children.nil?
 
-    p queue
+    #p queue[0]
+    p queue.include?(finish)
 
-    knight_trevails(queue.shift, result, finish) until queue.empty?
+    knight_trevails(queue.shift, finish, queue, result, used) until queue.empty?
 
-    result
+    node
   end
 
   def gerar_tree(start, finish, repeated = [], queue = [])
@@ -94,7 +98,7 @@ end
 class Knight
   attr_accessor :position, :children, :parent
 
-  def initialize(position, finish, parent = [], children = [])
+  def initialize(position, finish, children = [])
     return nil if position.nil?
 
     @position = position
@@ -108,6 +112,10 @@ class Knight
     @children = adj_list[0][1...]
 
     @children
+  end
+
+  def parent
+    @parent.nil? ? nil : @parent
   end
 
   attr_reader :children, :adj_list, :position, :moves
@@ -137,8 +145,8 @@ class Knight
   end
 
   def inspect
-    "(Knight position: #{@position}, children: #{@children})"
-end
+    "(Knight position: #{@position}, children: #{@children}, parent: #{@parent})"
+  end
 
   def movimentos(height, width)
     @move_1 = moves_valid?(height + 2, width - 1)
@@ -165,4 +173,4 @@ end
 
 # t = Board.new([3,3], [4,5])
 
-t = Board.new([3, 3], [2, 4])
+t = Board.new([3, 3], [4, 3])
