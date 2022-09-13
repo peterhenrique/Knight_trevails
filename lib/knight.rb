@@ -12,94 +12,87 @@ class Board
     # @board = Array.new(8) { Array.new(8, 0) }
     # @start = asking_start
     # @finish = asking_end
+    @root = Knight.new(start, finish)
 
-    @root = gerar_tree(start, finish)
+    gerar_children(root, finish)
 
-    p knight_trevails(@root, finish)
+    gerar_graph(root, finish)
 
-    # p @root.adj_list
+    end_node = check_child(root, finish)
 
-    # @root.ajd_list_child(finish)
-    # p @root.children
-    # p @root
+    # p end_node.parent.parent
+
+    parent = find_parent(end_node)
+
+    count(parent)
   end
 
-  def knight_trevails(node, finish, queue = [], result = [])
-    
+  def find_parent(node, order = [])
+    order << node
+    return order if node.parent.nil?
 
-    
-   
+    find_parent(node.parent, order)
+  end
+
+  def count(arr, i = -1)
+    until arr.empty?
+      i += 1
+      p arr.pop
+    end
+
+    if i == 1
+      puts "Your Knight took #{i} move."
+    else
+      puts "Your Knight took #{i} moves."
+    end
+  end
+
+  def gerar_children(node, finish, queue = [])
+    return nil if node.nil?
+
+    return if node.position == finish
+
+    queue += node.adj_list[0][1..]
+
+    if node.adj_list[0][1..].include?(finish)
+      node.children << Knight.new(finish, finish, node)
+    else
+      node.children << Knight.new(queue.shift, finish, node) until queue.empty?
+    end
+
+    node
+  end
+
+  def gerar_graph(node, finish, queue = [])
+    queue += node.children
+    # p queue[0]
+    gerar_children(queue.shift, finish) until queue.empty?
+    node
+  end
+
+  def check_child(node, finish, queue = [], visited = [])
     return if node.nil?
 
-    return if result.include? node.position
-
-    #p node.position
-
-    result << node.position
-
-    return result if node.position == finish
-    queue += node.children unless node.children.nil?
-
-    #p queue[0]
-    p queue.include?(finish)
-
-    knight_trevails(queue.shift, finish, queue, result, used) until queue.empty?
-
-    node
-  end
-
-  def gerar_tree(start, finish, repeated = [], queue = [])
-
-    node = Knight.new(start, finish)
-    return nil if node.nil?
     return node if node.position == finish
-    return nil if repeated.include?(node.position)
 
-    repeated << start
+    return if visited.include?(node)
 
-    return node.position if finish == node.position
+    visited << node
 
-       
+    queue += node.children unless node.children.nil?
+    check_child(queue.shift, finish, queue, visited)
 
-    queue += node.adj_list[0][1...].compact unless node.adj_list[0][1...].nil?
-
-
-    #p queue
-
-    if queue.include?(finish) 
-      node.children << gerar_tree(finish, finish) 
-    else
-        node.children << gerar_tree(queue.shift, finish, repeated) until queue.empty?
-    end
-    
-
-    # p repeated
-
-    node
-  end
-
-  def insert_knight(height, width)
-    @board[height][width] = Knight.new(height, width)
-  end
-
-  def asking_start
-    puts 'where do you want to start?'
-    input = gets.chomp.split('').map(&:to_i).reject(&:zero?)
-    insert_knight(input[0], input[-1])
-    input
-  end
-
-  def asking_end
-    puts 'where do you want to end?'
-    input = gets.chomp.split('').map(&:to_i).reject(&:zero?)
+    # p node
   end
 end
 
 class Knight
-  attr_accessor :position, :children, :parent
+  attr_accessor :position, :children, :parent, :visited
 
-  def initialize(position, finish, children = [])
+  def initialize(position, finish, parent = nil, children = [])
     return nil if position.nil?
+
+    @visited = false
 
     @position = position
     movimentos(position[0], @position[-1])
@@ -145,7 +138,7 @@ class Knight
   end
 
   def inspect
-    "(Knight position: #{@position}, children: #{@children}, parent: #{@parent})"
+    "(Knight position: #{@position})"
   end
 
   def movimentos(height, width)
@@ -169,8 +162,8 @@ class Knight
   end
 end
 
- #t = Board.new([3,3], [3,3])
+# t = Board.new([3,3], [3,3])
 
 # t = Board.new([3,3], [4,5])
 
-t = Board.new([3, 3], [4, 3])
+t = Board.new([3, 3], [3, 3])
