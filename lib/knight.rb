@@ -14,13 +14,21 @@ class Board
     # @finish = asking_end
     @root = Knight.new(start, finish)
 
-    gerar_children(root, finish)
+    knight_trevails(root, finish)
+  end
 
-    gerar_graph(root, finish)
+  def knight_trevails(root, finish, end_node = nil, queue = [], _visited = [])
+    while end_node.nil?
+      gerar_children(root, finish)
 
-    end_node = check_child(root, finish)
+      # gerar_graph(root, finish)
 
-    # p end_node.parent.parent
+      end_node = check_child(root, finish)
+      queue += root.children
+
+      p queue.size
+
+    end
 
     parent = find_parent(end_node)
 
@@ -47,26 +55,25 @@ class Board
     end
   end
 
-  def gerar_children(node, finish, queue = [])
-    return nil if node.nil?
+  def gerar_children(node, finish, queue = [], queue2 = [], visited = [])
+    return nil if node.position.nil?
 
-    return if node.position == finish
+    visited << node
+
+    return node if node.position == finish
 
     queue += node.adj_list[0][1..]
+    queue.compact!
 
     if node.adj_list[0][1..].include?(finish)
       node.children << Knight.new(finish, finish, node)
     else
+      # p queue[0].nil?
       node.children << Knight.new(queue.shift, finish, node) until queue.empty?
+      queue2 += node.children
+      gerar_children(queue2.shift, finish, queue, queue2, visited)
     end
 
-    node
-  end
-
-  def gerar_graph(node, finish, queue = [])
-    queue += node.children
-    # p queue[0]
-    gerar_children(queue.shift, finish) until queue.empty?
     node
   end
 
@@ -166,4 +173,8 @@ end
 
 # t = Board.new([3,3], [4,5])
 
-t = Board.new([3, 3], [3, 3])
+t = Board.new([3, 3], [2, 4])
+
+t = Board.new([3, 3], [4, 3])
+
+t = Board.new([3, 3], [7, 4])
